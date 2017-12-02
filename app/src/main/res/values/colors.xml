@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#103f7f</color>
+    <color name="colorPrimaryDark">#103f7f</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="white">#ffffff</color>
+
+    <color name="app_background">@color/white</color>
+    <color name="app_background_light_grey">#f6f9fc</color>
+    <color name="background_color">#ffe0e0e0</color>
+    <color name="background_floating_material_dark">@color/material_grey_800</color>
+    <color name="background_material_dark">@color/material_grey_850</color>
+    <color name="background_material_light">@color/material_grey_50</color>
+
+    <color name="primary_dark_material_light">@color/material_grey_600</color>
+    <color name="primary_light">#bcd6e7</color>
+    <color name="primary_material_dark">@color/material_grey_900</color>
+    <color name="primary_material_light">@color/material_grey_100</color>
+    <color name="primary_mystique_extra_light_text_color">#801a3650</color>
+    <color name="primary_mystique_light_text_color">#b31a3650</color>
+    <color name="primary_mystique_text_color">#1a3650</color>
+    <color name="primary_text_default_material_dark">#ffffffff</color>
+    <color name="primary_text_default_material_light">#de000000</color>
+    <color name="primary_text_disabled_material_dark">#4dffffff</color>
+    <color name="primary_text_disabled_material_light">#39000000</color>
+    <color name="primary_translucent">#10005b95</color>
+    <color name="primary_transparent">#00103f7f</color>
+
+    <color name="ripple_material_dark">#33ffffff</color>
+    <color name="ripple_material_light">#1f000000</color>
+    <color name="secondary_text_default_material_dark">#b3ffffff</color>
+    <color name="secondary_text_default_material_light">#8a000000</color>
+    <color name="secondary_text_disabled_material_dark">#36ffffff</color>
+    <color name="secondary_text_disabled_material_light">#24000000</color>
+    <color name="section_header">#757575</color>
+    <color name="section_header_mystique">#0667d0</color>
+    <color name="cerulean">#0667d0</color>
+    <color name="gradient_secondary_blue">#0655ab</color>
+
+    <color name="dark_grey">#4e5c6e</color>
+    <color name="dark_grey_text">#475963</color>
+    <color name="dark_sky_blue">#3c90df</color>
+    <color name="dark_translucent">#0000</color>
+
+    <color name="highlighted_text_material_dark">#6680cbc4</color>
+    <color name="highlighted_text_material_light">#66009688</color>
+    <color name="intro_chart_min_max_color">#578ab8</color>
+    <color name="intro_light_blue">#94c2ff</color>
+    <color name="light_grey">#9daab9</color>
+    <color name="light_grey2">#c0ccda</color>
+    <color name="light_grey3">#f1f3f5</color>
+    <color name="limit_blue">#a5d4ff</color>
+    <color name="limit_green">#c8eb8a</color>
+    <color name="link_text_color">#0667d0</color>
+    <color name="main_menu_background">#eeeeee</color>
+    <color name="material_blue_grey_800">#ff37474f</color>
+    <color name="material_blue_grey_900">#ff263238</color>
+    <color name="material_blue_grey_950">#ff21272b</color>
+    <color name="material_deep_teal_200">#ff80cbc4</color>
+    <color name="material_deep_teal_500">#ff009688</color>
+    <color name="material_grey_100">#fff5f5f5</color>
+    <color name="material_grey_300">#ffe0e0e0</color>
+    <color name="material_grey_50">#fffafafa</color>
+    <color name="material_grey_600">#ff757575</color>
+    <color name="material_grey_800">#ff424242</color>
+    <color name="material_grey_850">#ff303030</color>
+    <color name="material_grey_900">#ff212121</color>
+    <color name="price_chart_divider">#48ffffff</color>
+    <color name="price_chart_limit_line">@color/dark_grey</color>
+    <color name="price_chart_marker">@color/dark_grey</color>
+    <color name="price_chart_step_line">#334e5c6e</color>
+    <color name="range_selected">#16000000</color>
+    <color name="status_bar_color">#ff0552a6</color>
+
+</resources>

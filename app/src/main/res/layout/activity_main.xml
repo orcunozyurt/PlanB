@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/main_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.nerdz.planb.ui.MaterialProgressBar
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:layout_centerInParent="true" />
+    <TextView android:textSize="14sp"
+        android:textColor="#ffffff"
+        android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
+        android:id="@+id/tvPleaseWait"
+        android:padding="15dp"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/please_wait"
+        android:layout_below="@+id/progress"
+        android:layout_centerHorizontal="true" />
+    <RelativeLayout android:id="@+id/rlContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:layout_above="@+id/signup_section"
+            android:layout_alignParentTop="true">
+            <RelativeLayout android:id="@+id/rlChartContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView android:id="@+id/logo"
+                    android:layout_width="@dimen/logo_width"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_default"
+                    android:layout_marginBottom="@dimen/margin_small"
+                    android:src="@mipmap/ic_launcher"
+                    android:layout_centerHorizontal="true" />
+                <fragment
+                    android:id="@+id/price_chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/logo"
+                    android:layout_alignParentBottom="true"
+                    class="com.nerdz.planb.PriceChartFragment" />
+            </RelativeLayout>
+        </ScrollView>
+        <LinearLayout android:orientation="vertical"
+            android:id="@+id/signup_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+            <Button android:id="@+id/btnLoginIntroSignupText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_default"
+                android:text="xxxxx"
+                android:filterTouchesWhenObscured="true"
+                 />
+            <TextView
+                android:textSize="14sp"
+                android:textColor="#ffffff"
+                android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
+                android:id="@+id/tvLoginIntroSignin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_default"
+                android:text="yy" />
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

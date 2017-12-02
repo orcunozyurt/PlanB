@@ -1,0 +1,53 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+
+    <style name="Theme.Mystique" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:colorBackground">@color/app_background_light_grey</item>
+        <item name="android:windowBackground">@color/app_background_light_grey</item>
+        <item name="actionBarItemBackground">@drawable/selectable_background</item>
+        <item name="colorPrimary">@color/cerulean</item>
+        <item name="colorPrimaryDark">@color/white</item>
+        <item name="colorAccent">@color/cerulean</item>
+    </style>
+
+
+
+    <style name="PriceChart">
+    </style>
+    <style name="PriceChart.Text">
+        <item name="android:textColor">@color/primary_mystique_text_color</item>
+
+    </style>
+    <style name="PriceChart.Text.Dollar">
+        <item name="android:textSize">18sp</item>
+        <item name="android:text">@string/dollar_sign</item>
+    </style>
+    <style name="PriceChart.Text.Info">
+        <item name="android:textSize">@dimen/text_size_medium_mystique</item>
+        <item name="android:textColor">@color/primary_mystique_extra_light_text_color</item>
+    </style>
+    <style name="PriceChart.Text.Price">
+        <item name="android:textSize">40sp</item>
+        <item name="android:padding">8dp</item>
+    </style>
+    <style name="PriceChart.Text.Range">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@drawable/price_range_text_color</item>
+        <item name="android:background">@drawable/price_range_background</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:layout_marginLeft">@dimen/margin_small</item>
+        <item name="android:layout_marginRight">@dimen/margin_small</item>
+        <item name="android:layout_height">32dp</item>
+    </style>
+
+    <string name="dollar_sign">$</string>
+    <dimen name="text_size_medium_mystique">16sp</dimen>
+</resources>
