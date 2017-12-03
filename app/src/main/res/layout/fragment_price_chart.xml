@@ -211,41 +211,31 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true">
-    <TextView
-        android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
-        android:id="@+id/tvRangeHour"
-        android:text="@string/one_hour"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="@style/PriceChart.Text.Range" />
+
     <TextView android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
         android:id="@+id/tvRangeDay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/selectable_background"
+        android:clickable="true"
         android:text="@string/one_day"
         style="@style/PriceChart.Text.Range" />
-    <TextView android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
-        android:id="@+id/tvRangeWeek"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/one_week"
-        style="@style/PriceChart.Text.Range" />
+
     <TextView android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
         android:id="@+id/tvRangeMonth"
         android:text="@string/one_month"
+        android:background="@drawable/selectable_background"
+        android:clickable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/PriceChart.Text.Range" />
-    <TextView android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
-        android:id="@+id/tvRangeYear"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/one_year"
-        style="@style/PriceChart.Text.Range" />
+
     <TextView android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
         android:id="@+id/tvRangeAll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:clickable="true"
+        android:background="@drawable/selectable_background"
         android:text="@string/all"
         style="@style/PriceChart.Text.Range" />
 </LinearLayout>

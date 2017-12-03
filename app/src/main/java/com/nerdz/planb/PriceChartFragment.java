@@ -1,6 +1,9 @@
 package com.nerdz.planb;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,16 +21,39 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.utils.EntryXComparator;
 import com.google.gson.Gson;
 import com.nerdz.planb.models.CryptoCurrencyData;
+import com.nerdz.planb.models.HistoricalData;
 import com.nerdz.planb.utils.ApiUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -71,7 +97,9 @@ public class PriceChartFragment extends Fragment {
     private TextView tvRangeMonth;
     private TextView tvRangeYear;
     private TextView tvRangeAll;
-    private LineChart vPriceChart;
+    private LineChart mChart;
+    private List<HistoricalData> mHistoricalDataList = new ArrayList<>();
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -143,17 +171,177 @@ public class PriceChartFragment extends Fragment {
         tvHighlightedDate = (TextView) view.findViewById(R.id.tvHighlightedDate);
         rangeSection = (RelativeLayout) view.findViewById(R.id.range_section);
         rangePicker = (LinearLayout) view.findViewById(R.id.range_picker);
-        tvRangeHour = (TextView) view.findViewById(R.id.tvRangeHour);
         tvRangeDay = (TextView) view.findViewById(R.id.tvRangeDay);
-        tvRangeWeek = (TextView) view.findViewById(R.id.tvRangeWeek);
         tvRangeMonth = (TextView) view.findViewById(R.id.tvRangeMonth);
-        tvRangeYear = (TextView) view.findViewById(R.id.tvRangeYear);
         tvRangeAll = (TextView) view.findViewById(R.id.tvRangeAll);
-        vPriceChart = (LineChart) view.findViewById(R.id.vPriceChart);
+        mChart = (LineChart) view.findViewById(R.id.vPriceChart);
 
-        getCryptoCurrencyData("BTC");
+        rlPriceHighlightSection.setVisibility(View.GONE);
+        rlPriceSection.setVisibility(View.VISIBLE);
+
+        getRecentCurrencyData("BTC");
+        getHistoricalCurrencyData("BTC","daily");
+
+        // no description text
+        mChart.getDescription().setEnabled(false);
+
+        // enable touch gestures
+        mChart.setTouchEnabled(true);
+
+        mChart.setDragDecelerationFrictionCoef(0.9f);
+
+        // enable scaling and dragging
+        mChart.setDragEnabled(true);
+        mChart.setDrawMarkerViews(true);
+        mChart.setScaleEnabled(true);
+        mChart.setDrawGridBackground(false);
+        mChart.setHighlightPerDragEnabled(true);
+
+        mChart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("YYYY", "onClick: ");
+                rlPriceHighlightSection.animate().setDuration(200).alpha(0).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        rlPriceHighlightSection.setVisibility(View.GONE);
+
+                    }
+                });
+                rlPriceSection.animate().setDuration(200).alpha(1).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        rlPriceSection.setVisibility(View.VISIBLE);
+
+                    }
+                });
+            }
+        });
+
+        mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(final Entry e, Highlight h) {
+
+                Log.d("YYYY", "onValueSelected: "+e.getY());
+                rlPriceHighlightSection.animate().setDuration(200).alpha(1).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        rlPriceHighlightSection.setVisibility(View.VISIBLE);
+
+                        tvHighlightedPrice.setText(String.valueOf(e.getY()));
+                        tvHighlightedDate.setText(String.valueOf(e.getX()));
+                    }
+                });
+                rlPriceSection.animate().setDuration(200).alpha(0).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        rlPriceSection.setVisibility(View.GONE);
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+
+
+
 
     }
+
+
+    private void setData() {
+
+        ArrayList<Entry> values = new ArrayList<Entry>();
+
+        float last = 0;
+
+        for (HistoricalData hd : mHistoricalDataList) {
+
+            long t = TimeUnit.MILLISECONDS.toHours(hd.getStamp());
+
+            BigDecimal number = new BigDecimal(String.valueOf(hd.getAverage()));
+
+            float y = number.floatValue();
+
+            //Log.d("PRICECHART", "setData: "+ y + " - "+(float)t + " - "+ hd.getStamp());
+
+            if((float)t != last) {
+                Log.d("PRICECHART", "setData: "+ y + " - "+(float)t + " - "+ hd.getStamp());
+                values.add(new Entry((float) t, y)); // add one entry per hour
+                last = (float)t;
+            }
+        }
+
+        Collections.sort(values, new EntryXComparator());
+
+        // create a dataset and give it a type
+        LineDataSet set1 = new LineDataSet(values, "DataSet 1");
+        set1.setAxisDependency(YAxis.AxisDependency.LEFT);
+        set1.setColor(Color.WHITE);
+        set1.setValueTextColor(Color.WHITE);
+        set1.setLineWidth(1.5f);
+        set1.setDrawCircles(false);
+        set1.setDrawValues(false);
+        set1.setDrawHorizontalHighlightIndicator(false);
+        set1.setHighlightEnabled(true);
+        set1.setFillAlpha(65);
+        set1.setFillColor(ColorTemplate.getHoloBlue());
+        set1.setHighLightColor(Color.WHITE);
+        set1.setDrawCircleHole(false);
+
+        // create a data object with the datasets
+        LineData data = new LineData(set1);
+        data.setValueTextColor(Color.WHITE);
+        data.setValueTextSize(9f);
+
+        // set data
+        mChart.setData(data);
+        mChart.invalidate();
+
+        // get the legend (only possible after setting data)
+        Legend l = mChart.getLegend();
+        l.setEnabled(false);
+
+        XAxis xAxis = mChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
+        xAxis.setTextSize(10f);
+        xAxis.setTextColor(Color.WHITE);
+        xAxis.setDrawAxisLine(false);
+        xAxis.setDrawGridLines(false);
+        xAxis.setCenterAxisLabels(true);
+        xAxis.setGranularity(1f); // one hour
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+
+            private SimpleDateFormat mFormat = new SimpleDateFormat("HH:mm");
+
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+
+                long millis = TimeUnit.HOURS.toMillis((long) value);
+                return mFormat.format(new Date(millis));
+            }
+        });
+
+        YAxis leftAxis = mChart.getAxisLeft();
+        leftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+        leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setGranularityEnabled(true);
+        leftAxis.setAxisMinimum(set1.getYMin());
+        leftAxis.setAxisMaximum(set1.getYMax());
+        leftAxis.setYOffset(-9f);
+
+
+        YAxis rightAxis = mChart.getAxisRight();
+        rightAxis.setEnabled(false);
+
+
+    }
+
 
     private View getPriceSeparator(){
         return (View) getView().findViewById(R.id.price_separator);
@@ -199,7 +387,7 @@ public class PriceChartFragment extends Fragment {
     }
 
     // Gets Data from our endpoint
-    public void getCryptoCurrencyData(String CCURRENCY){
+    public void getRecentCurrencyData(String CCURRENCY){
 
         String tag_json_arry = "GLOBAL";
         String url = ApiUtils.BASEURL + "/indices/global/ticker/"+CCURRENCY+"USD";
@@ -253,6 +441,73 @@ public class PriceChartFragment extends Fragment {
 
         // Adding request to request queue
         PlanBApplication.getInstance().addToRequestQueue(jsObjRequest, tag_json_arry);
+
+
+
+    }
+
+    // makes request to history endpoint
+    public void getHistoricalCurrencyData(String CCURRENCY, String period){
+
+        String tag_json_arry = "GLOBAL";
+        String url = ApiUtils.BASEURL + "/indices/global/history/"+CCURRENCY+"USD?period="+period+"&format=json";
+
+        Log.d("URL", "-->"+url);
+
+
+        JsonArrayRequest jsArrRequest = new JsonArrayRequest(Request.Method.GET,url,null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Log.d("RESPONSE:", response.toString());
+
+                        mHistoricalDataList.clear();
+
+                        Gson gson = new Gson();
+
+                        for( int i = 0; i < response.length(); i++){
+
+                            try {
+                                HistoricalData hd = gson.fromJson(
+                                        String.valueOf(response.get(i)),HistoricalData.class);
+
+                                mHistoricalDataList.add(hd);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        setData();
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+
+                    }
+                }) {
+
+
+            /**
+             * Passing some request headers
+             * */
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json");
+                return headers;
+            }
+        };
+        jsArrRequest.setRetryPolicy(new DefaultRetryPolicy(
+                20000,
+                1,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        // Adding request to request queue
+        PlanBApplication.getInstance().addToRequestQueue(jsArrRequest, tag_json_arry);
 
 
 
