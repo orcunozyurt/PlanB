@@ -2,7 +2,6 @@
     <string name="app_name">Plan B</string>
     <string name="please_wait">Please Wait..</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="btc">BTC</string>
     <string name="eth">ETH</string>
@@ -16,4 +15,7 @@
     <string name="one_month">1M</string>
     <string name="one_year">1Y</string>
     <string name="all">ALL</string>
+
+    <string name="publickey">YjFiNzU0NjkzMThlNDFmMTg3MDRlNjcwZDczZDJlMTg</string>
+    <string name="secretkey">MzJjMDBjOGJhYjY0NGM2M2FhNjY3NjMzYTIxOTdkNTNjNGEyYzcxMDE3NzI0NTVmOTViYmZiZjNhMzFkMzg5Ng</string>
 </resources>
