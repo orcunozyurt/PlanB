@@ -17,6 +17,7 @@
         android:id="@+id/tvCurrencyBitcoin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/selectable_background"
         android:text="@string/btc"
         style="@style/PriceChart.Text.Range" />
     <TextView
@@ -24,12 +25,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/eth"
+        android:background="@drawable/selectable_background"
         style="@style/PriceChart.Text.Range" />
     <TextView
         android:id="@+id/tvCurrencyLitecoin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/ltc"
+        android:background="@drawable/selectable_background"
         android:layout_weight="1.0"
         style="@style/PriceChart.Text.Range" />
 </LinearLayout>

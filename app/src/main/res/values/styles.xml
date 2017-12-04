@@ -14,7 +14,7 @@
         <item name="android:windowBackground">@color/app_background_light_grey</item>
         <item name="actionBarItemBackground">@drawable/selectable_background</item>
         <item name="colorPrimary">@color/cerulean</item>
-        <item name="colorPrimaryDark">@color/white</item>
+        <item name="colorPrimaryDark">@color/cerulean</item>
         <item name="colorAccent">@color/cerulean</item>
     </style>
 

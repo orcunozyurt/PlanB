@@ -37,7 +37,7 @@ public class MaterialProgressBar extends android.support.v7.widget.AppCompatImag
     }
 
     public void setVisibility(int visibility) {
-        if (visibility == 4 || visibility == 8) {
+        if (visibility == INVISIBLE || visibility == GONE) {
             clearAnimation();
         } else {
             setupDrawable(getContext());

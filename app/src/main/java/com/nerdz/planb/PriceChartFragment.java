@@ -100,10 +100,10 @@ public class PriceChartFragment extends Fragment {
     private LineChart mChart;
     private List<HistoricalData> mHistoricalDataList = new ArrayList<>();
 
-
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private static String mCurrencyPref = "BTC"; // App starts with BTC Currency default
+    private static String mPeriodPref = "daily"; // App starts with daily period default
 
     private OnFragmentInteractionListener mListener;
 
@@ -149,6 +149,17 @@ public class PriceChartFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        initUI(view);
+        prepareUI();
+        startDataFlow();
+
+        prepareChart();
+
+    }
+
+
+    public void initUI(View view){
+
         multiCurrency = (RelativeLayout) view.findViewById(R.id.multi_currency);
         currencyPicker = (LinearLayout) view.findViewById(R.id.currency_picker);
         tvCurrencyBitcoin = (TextView) view.findViewById(R.id.tvCurrencyBitcoin);
@@ -176,18 +187,136 @@ public class PriceChartFragment extends Fragment {
         tvRangeAll = (TextView) view.findViewById(R.id.tvRangeAll);
         mChart = (LineChart) view.findViewById(R.id.vPriceChart);
 
+
+
+
+
+    }
+
+    public void prepareUI(){
+
         rlPriceHighlightSection.setVisibility(View.GONE);
         rlPriceSection.setVisibility(View.VISIBLE);
 
-        getRecentCurrencyData("BTC");
-        getHistoricalCurrencyData("BTC","daily");
+        if(mPeriodPref.equalsIgnoreCase("daily")){
+            tvRangeDay.setSelected(true);
+            tvRangeMonth.setSelected(false);
+            tvRangeAll.setSelected(false);
+
+        }else if(mPeriodPref.equalsIgnoreCase("monthly")){
+            tvRangeDay.setSelected(false);
+            tvRangeMonth.setSelected(true);
+            tvRangeAll.setSelected(false);
+
+        }else if(mPeriodPref.equalsIgnoreCase("alltime")){
+            tvRangeDay.setSelected(false);
+            tvRangeMonth.setSelected(false);
+            tvRangeAll.setSelected(true);
+
+        }
+
+        if(mCurrencyPref.equalsIgnoreCase("BTC")){
+            tvCurrencyBitcoin.setSelected(true);
+            tvCurrencyEther.setSelected(false);
+            tvCurrencyLitecoin.setSelected(false);
+
+        }else if(mCurrencyPref.equalsIgnoreCase("ETH")){
+            tvCurrencyBitcoin.setSelected(false);
+            tvCurrencyEther.setSelected(true);
+            tvCurrencyLitecoin.setSelected(false);
+
+        }else if(mCurrencyPref.equalsIgnoreCase("LTC")){
+            tvCurrencyBitcoin.setSelected(false);
+            tvCurrencyEther.setSelected(false);
+            tvCurrencyLitecoin.setSelected(true);
+
+        }
+
+        tvRangeDay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPeriodPref = "daily";
+                changeDataScope();
+                view.setSelected(true);
+                tvRangeMonth.setSelected(false);
+                tvRangeAll.setSelected(false);
+
+            }
+        });
+        tvRangeMonth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mPeriodPref = "monthly";
+                changeDataScope();
+                view.setSelected(true);
+                tvRangeDay.setSelected(false);
+                tvRangeAll.setSelected(false);
+
+            }
+        });
+        tvRangeAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mPeriodPref = "alltime";
+                changeDataScope();
+                view.setSelected(true);
+                tvRangeDay.setSelected(false);
+                tvRangeMonth.setSelected(false);
+
+            }
+        });
+
+        tvCurrencyBitcoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mCurrencyPref = "BTC";
+                startDataFlow();
+                view.setSelected(true);
+                tvCurrencyEther.setSelected(false);
+                tvCurrencyLitecoin.setSelected(false);
+
+            }
+        });
+
+        tvCurrencyEther.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mCurrencyPref = "ETH";
+                startDataFlow();
+                view.setSelected(true);
+                tvCurrencyBitcoin.setSelected(false);
+                tvCurrencyLitecoin.setSelected(false);
+
+            }
+        });
+
+        tvCurrencyLitecoin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mCurrencyPref = "LTC";
+                startDataFlow();
+                view.setSelected(true);
+                tvCurrencyBitcoin.setSelected(false);
+                tvCurrencyEther.setSelected(false);
+
+            }
+        });
+
+
+    }
+
+    public void prepareChart(){
 
         // no description text
         mChart.getDescription().setEnabled(false);
 
         // enable touch gestures
         mChart.setTouchEnabled(true);
-
         mChart.setDragDecelerationFrictionCoef(0.9f);
 
         // enable scaling and dragging
@@ -197,6 +326,10 @@ public class PriceChartFragment extends Fragment {
         mChart.setDrawGridBackground(false);
         mChart.setHighlightPerDragEnabled(true);
 
+
+        // OnClick event is consumed when user removes contact with chart.
+        // Good time to fade out chart data and fade in current price Data
+        // Simple animation is provided for smooth transition
         mChart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -218,6 +351,9 @@ public class PriceChartFragment extends Fragment {
             }
         });
 
+        // On Chart Value selected, when user selects a point on chart
+        // Good time to fade out current price Data and fade in chart data
+        // Simple animation is provided for smooth transition
         mChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @Override
             public void onValueSelected(final Entry e, Highlight h) {
@@ -249,11 +385,28 @@ public class PriceChartFragment extends Fragment {
         });
 
 
+    }
 
+    public void startDataFlow(){
+
+        getRecentCurrencyData(mCurrencyPref);
+        getHistoricalCurrencyData(mCurrencyPref,mPeriodPref);
+
+    }
+
+    public void changeDataScope(){
+
+        getHistoricalCurrencyData(mCurrencyPref,mPeriodPref);
 
     }
 
 
+    /**
+     * Use this method to provide data to
+     * linechart
+     *
+     * @return void .
+     */
     private void setData() {
 
         ArrayList<Entry> values = new ArrayList<Entry>();
@@ -262,7 +415,17 @@ public class PriceChartFragment extends Fragment {
 
         for (HistoricalData hd : mHistoricalDataList) {
 
-            long t = TimeUnit.MILLISECONDS.toHours(hd.getStamp());
+            long t = 0;
+            if(mPeriodPref.equalsIgnoreCase("daily")){
+                t = TimeUnit.MILLISECONDS.toHours(hd.getStamp());
+
+            }else if(mPeriodPref.equalsIgnoreCase("monthly")){
+                t = TimeUnit.MILLISECONDS.toHours(hd.getStamp());
+
+            }else if(mPeriodPref.equalsIgnoreCase("alltime")){
+                t = TimeUnit.MILLISECONDS.toDays(hd.getStamp());
+
+            }
 
             BigDecimal number = new BigDecimal(String.valueOf(hd.getAverage()));
 
@@ -271,7 +434,7 @@ public class PriceChartFragment extends Fragment {
             //Log.d("PRICECHART", "setData: "+ y + " - "+(float)t + " - "+ hd.getStamp());
 
             if((float)t != last) {
-                Log.d("PRICECHART", "setData: "+ y + " - "+(float)t + " - "+ hd.getStamp());
+                //Log.d("PRICECHART", "setData: "+ y + " - "+(float)t + " - "+ hd.getStamp());
                 values.add(new Entry((float) t, y)); // add one entry per hour
                 last = (float)t;
             }
@@ -317,7 +480,7 @@ public class PriceChartFragment extends Fragment {
         xAxis.setGranularity(1f); // one hour
         xAxis.setValueFormatter(new IAxisValueFormatter() {
 
-            private SimpleDateFormat mFormat = new SimpleDateFormat("HH:mm");
+            private SimpleDateFormat mFormat = new SimpleDateFormat("ddMMM HH:mm");
 
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
@@ -347,10 +510,10 @@ public class PriceChartFragment extends Fragment {
         return (View) getView().findViewById(R.id.price_separator);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+
+    public void loadStatusChange(Boolean shouldShow) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteraction(shouldShow);
         }
     }
 
@@ -383,7 +546,7 @@ public class PriceChartFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteraction(Boolean shouldShow);
     }
 
     // Gets Data from our endpoint
@@ -393,6 +556,7 @@ public class PriceChartFragment extends Fragment {
         String url = ApiUtils.BASEURL + "/indices/global/ticker/"+CCURRENCY+"USD";
 
         Log.d("URL", "-->"+url);
+        loadStatusChange(true);
 
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET,url,null,
@@ -400,6 +564,7 @@ public class PriceChartFragment extends Fragment {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d("RESPONSE:", response.toString());
+
 
                         Gson gson = new Gson();
 
@@ -418,6 +583,12 @@ public class PriceChartFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+
+                        try {
+                            loadStatusChange(false);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
 
 
                     }
@@ -453,6 +624,7 @@ public class PriceChartFragment extends Fragment {
         String url = ApiUtils.BASEURL + "/indices/global/history/"+CCURRENCY+"USD?period="+period+"&format=json";
 
         Log.d("URL", "-->"+url);
+        loadStatusChange(true);
 
 
         JsonArrayRequest jsArrRequest = new JsonArrayRequest(Request.Method.GET,url,null,
@@ -460,6 +632,12 @@ public class PriceChartFragment extends Fragment {
                     @Override
                     public void onResponse(JSONArray response) {
                         Log.d("RESPONSE:", response.toString());
+
+                        try {
+                            loadStatusChange(false);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
 
                         mHistoricalDataList.clear();
 
@@ -485,6 +663,12 @@ public class PriceChartFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+
+                        try {
+                            loadStatusChange(false);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
 
 
                     }
