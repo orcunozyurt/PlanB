@@ -373,7 +373,7 @@ public class PriceChartFragment extends Fragment {
         mChart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("YYYY", "onClick: ");
+                //Log.d("YYYY", "onClick: ");
                 rlPriceHighlightSection.animate().setDuration(200).alpha(0).setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -398,7 +398,7 @@ public class PriceChartFragment extends Fragment {
             @Override
             public void onValueSelected(final Entry e, Highlight h) {
 
-                Log.d("YYYY", "onValueSelected: "+e.getY());
+                //Log.d("YYYY", "onValueSelected: "+e.getY());
                 rlPriceHighlightSection.animate().setDuration(200).alpha(1).setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -676,7 +676,7 @@ public class PriceChartFragment extends Fragment {
         String tag_json_arry = "GLOBAL";
         String url = ApiUtils.BASEURL + "/indices/global/ticker/"+CCURRENCY+"USD";
 
-        Log.d("URL", "-->"+url);
+        //Log.d("URL", "-->"+url);
         loadStatusChange(true);
 
 
@@ -693,7 +693,7 @@ public class PriceChartFragment extends Fragment {
                                 CryptoCurrencyData.class);
 
 
-                        Log.d("GSONPARSEDEBUG", "-------->>"+ccd.toString());
+                        //Log.d("GSONPARSEDEBUG", "-------->>"+ccd.toString());
 
 
                         updateCurrentPriceUI(ccd.getAsk(), ccd.getChanges().getPrice().getDaily());
@@ -750,7 +750,7 @@ public class PriceChartFragment extends Fragment {
         String tag_json_arry = "GLOBAL";
         String url = ApiUtils.BASEURL + "/indices/global/history/"+CCURRENCY+"USD?period="+period+"&format=json";
 
-        Log.d("URL", "-->"+url);
+        //Log.d("URL", "-->"+url);
         loadStatusChange(true);
 
 
@@ -758,7 +758,7 @@ public class PriceChartFragment extends Fragment {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        Log.d("RESPONSE:", response.toString());
+                        //Log.d("RESPONSE:", response.toString());
 
                         try {
                             loadStatusChange(false);
