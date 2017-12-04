@@ -53,6 +53,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 
@@ -151,7 +153,24 @@ public class PriceChartFragment extends Fragment {
 
         initUI(view);
         prepareUI();
-        startDataFlow();
+        Timer timer = new Timer();
+
+        // get data and update ui in every 50 seconds.
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startDataFlow();
+                    }
+                });
+            }
+        };
+
+
+        timer.schedule(timerTask, 0, 50000);
+
 
         prepareChart();
 
@@ -321,7 +340,6 @@ public class PriceChartFragment extends Fragment {
 
         // enable scaling and dragging
         mChart.setDragEnabled(true);
-        mChart.setDrawMarkerViews(true);
         mChart.setScaleEnabled(true);
         mChart.setDrawGridBackground(false);
         mChart.setHighlightPerDragEnabled(true);
@@ -447,7 +465,7 @@ public class PriceChartFragment extends Fragment {
         set1.setAxisDependency(YAxis.AxisDependency.LEFT);
         set1.setColor(Color.WHITE);
         set1.setValueTextColor(Color.WHITE);
-        set1.setLineWidth(1.5f);
+        set1.setLineWidth(1f);
         set1.setDrawCircles(false);
         set1.setDrawValues(false);
         set1.setDrawHorizontalHighlightIndicator(false);
@@ -456,6 +474,7 @@ public class PriceChartFragment extends Fragment {
         set1.setFillColor(ColorTemplate.getHoloBlue());
         set1.setHighLightColor(Color.WHITE);
         set1.setDrawCircleHole(false);
+        set1.disableDashedLine();
 
         // create a data object with the datasets
         LineData data = new LineData(set1);
@@ -471,28 +490,58 @@ public class PriceChartFragment extends Fragment {
         l.setEnabled(false);
 
         XAxis xAxis = mChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextSize(10f);
         xAxis.setTextColor(Color.WHITE);
-        xAxis.setDrawAxisLine(false);
+        xAxis.setDrawAxisLine(true);
         xAxis.setDrawGridLines(false);
-        xAxis.setCenterAxisLabels(true);
+        xAxis.setCenterAxisLabels(false);
         xAxis.setGranularity(1f); // one hour
-        xAxis.setValueFormatter(new IAxisValueFormatter() {
+        if(mPeriodPref.equalsIgnoreCase("daily")) {
+            xAxis.setValueFormatter(new IAxisValueFormatter() {
 
-            private SimpleDateFormat mFormat = new SimpleDateFormat("ddMMM HH:mm");
+                private SimpleDateFormat mFormat = new SimpleDateFormat("HH:mm");
 
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
 
-                long millis = TimeUnit.HOURS.toMillis((long) value);
-                return mFormat.format(new Date(millis));
-            }
-        });
+                    long millis = TimeUnit.HOURS.toMillis((long) value);
+                    return mFormat.format(new Date(millis));
+                }
+            });
+        }else if(mPeriodPref.equalsIgnoreCase("monthly")){
+            xAxis.setValueFormatter(new IAxisValueFormatter() {
+
+                private SimpleDateFormat mFormat = new SimpleDateFormat("ddMMM");
+
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
+
+                    long millis = TimeUnit.HOURS.toMillis((long) value);
+                    return mFormat.format(new Date(millis));
+                }
+            });
+
+        }else{
+
+            xAxis.setValueFormatter(new IAxisValueFormatter() {
+
+                private SimpleDateFormat mFormat = new SimpleDateFormat("yyyy");
+
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
+
+                    long millis = TimeUnit.DAYS.toMillis((long) value);
+                    return mFormat.format(new Date(millis));
+                }
+            });
+        }
 
         YAxis leftAxis = mChart.getAxisLeft();
         leftAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
         leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setDrawAxisLine(true);
+        leftAxis.setDrawGridLines(false);
         leftAxis.setGranularityEnabled(true);
         leftAxis.setAxisMinimum(set1.getYMin());
         leftAxis.setAxisMaximum(set1.getYMax());
