@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -217,9 +218,6 @@ public class PriceChartFragment extends Fragment {
         tvRangeMonth = (TextView) view.findViewById(R.id.tvRangeMonth);
         tvRangeAll = (TextView) view.findViewById(R.id.tvRangeAll);
         mChart = (LineChart) view.findViewById(R.id.vPriceChart);
-
-
-
 
 
     }
@@ -714,6 +712,8 @@ public class PriceChartFragment extends Fragment {
                         }
 
 
+
+
                     }
                 }) {
 
@@ -795,6 +795,11 @@ public class PriceChartFragment extends Fragment {
                             loadStatusChange(false);
                         }catch (Exception e){
                             e.printStackTrace();
+                        }
+
+                        if(isAdded()) {
+                            Snackbar.make(getActivity().findViewById(android.R.id.content),
+                                    getResources().getString(R.string.ratelimit), Snackbar.LENGTH_LONG).show();
                         }
 
 
