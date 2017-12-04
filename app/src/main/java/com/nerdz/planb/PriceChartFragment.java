@@ -3,8 +3,8 @@ package com.nerdz.planb;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -101,6 +101,7 @@ public class PriceChartFragment extends Fragment {
     private TextView tvRangeAll;
     private LineChart mChart;
     private List<HistoricalData> mHistoricalDataList = new ArrayList<>();
+    private SharedPreferences prefs;
 
     private String mParam1;
     private String mParam2;
@@ -121,7 +122,7 @@ public class PriceChartFragment extends Fragment {
      * @param param2 Parameter 2.
      * @return A new instance of fragment PriceChartFragment.
      */
-    // TODO: Rename and change types and number of parameters
+
     public static PriceChartFragment newInstance(String param1, String param2) {
         PriceChartFragment fragment = new PriceChartFragment();
         Bundle args = new Bundle();
@@ -138,6 +139,7 @@ public class PriceChartFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
@@ -151,6 +153,9 @@ public class PriceChartFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        prefs = getContext().getSharedPreferences(
+                "bitwatch", Context.MODE_PRIVATE);
+
         initUI(view);
         prepareUI();
         Timer timer = new Timer();
@@ -159,12 +164,14 @@ public class PriceChartFragment extends Fragment {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        startDataFlow();
-                    }
-                });
+                if(isAdded()) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            startDataFlow();
+                        }
+                    });
+                }
             }
         };
 
@@ -174,9 +181,14 @@ public class PriceChartFragment extends Fragment {
 
         prepareChart();
 
+
     }
 
 
+    /**
+     * Layout initialization is provided in this method.
+     * @param view parent view
+     */
     public void initUI(View view){
 
         multiCurrency = (RelativeLayout) view.findViewById(R.id.multi_currency);
@@ -212,7 +224,13 @@ public class PriceChartFragment extends Fragment {
 
     }
 
+
+    /**
+     * Initial UI preparations for setting click listeners
+     * and clicable tv states
+     */
     public void prepareUI(){
+
 
         rlPriceHighlightSection.setVisibility(View.GONE);
         rlPriceSection.setVisibility(View.VISIBLE);
@@ -329,6 +347,10 @@ public class PriceChartFragment extends Fragment {
 
     }
 
+    /**
+     * Method prepares the Chart that is seen on screen
+     * A line Chart With X and Y Axis
+     */
     public void prepareChart(){
 
         // no description text
@@ -405,6 +427,11 @@ public class PriceChartFragment extends Fragment {
 
     }
 
+    /**
+     * Method calls async http request methods
+     * gets recent price and historical data at the same time
+     * for drawing a chart.
+     */
     public void startDataFlow(){
 
         getRecentCurrencyData(mCurrencyPref);
@@ -412,24 +439,62 @@ public class PriceChartFragment extends Fragment {
 
     }
 
+    /**
+     * Method gets Historical Data again
+     * with changed currency or period
+     *
+     */
     public void changeDataScope(){
 
         getHistoricalCurrencyData(mCurrencyPref,mPeriodPref);
 
     }
 
+    /**
+     * updates current price and change views
+     * adds those values in sharedpreferences
+     * so that in mainactivity share function
+     * can create a nice text to share
+     * @param current current price
+     * @param change change in price (-,+)
+     */
+    private void updateCurrentPriceUI(Double current, Double change) {
+
+        tvCurrentPrice.setText(String.valueOf(current));
+        tvPriceChange.setText(String.valueOf(change));
+        if(change < 0){
+            tvPriceChange.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.indicator_down, 0);
+        }else if(change > 0){
+            tvPriceChange.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.indicator_up, 0);
+        }
+
+        prefs.edit().putString("ccurrency", mCurrencyPref).apply();
+        prefs.edit().putString("price", String.valueOf(current)).apply();
+        prefs.edit().putString("change",
+                String.valueOf(change)).apply();
+        if(change>0) {
+            prefs.edit().putString("trend", "UP!").apply();
+        }else {
+            prefs.edit().putString("trend", "DOWN!").apply();
+        }
+    }
+
 
     /**
-     * Use this method to provide data to
-     * linechart
+     * Use this method to provide data to linechart
      *
-     * @return void .
      */
     private void setData() {
 
         ArrayList<Entry> values = new ArrayList<Entry>();
 
         float last = 0;
+
+        // We dont want same different values for same date
+        // Since daily data is incremented by minutes in api
+        // when you filter hourly, there are many data for same hour
+        // It creates problem on scope of chart
+        // therefore eleminate if (t == last)
 
         for (HistoricalData hd : mHistoricalDataList) {
 
@@ -449,7 +514,6 @@ public class PriceChartFragment extends Fragment {
 
             float y = number.floatValue();
 
-            //Log.d("PRICECHART", "setData: "+ y + " - "+(float)t + " - "+ hd.getStamp());
 
             if((float)t != last) {
                 //Log.d("PRICECHART", "setData: "+ y + " - "+(float)t + " - "+ hd.getStamp());
@@ -458,6 +522,7 @@ public class PriceChartFragment extends Fragment {
             }
         }
 
+        // library has a bug. Thats why we need to sort it before use
         Collections.sort(values, new EntryXComparator());
 
         // create a dataset and give it a type
@@ -560,6 +625,11 @@ public class PriceChartFragment extends Fragment {
     }
 
 
+    /**
+     * Material progress spinner is in MainActivity
+     * Here we can communicate through this interface method
+     * @param shouldShow should show spinner or not
+     */
     public void loadStatusChange(Boolean shouldShow) {
         if (mListener != null) {
             mListener.onFragmentInteraction(shouldShow);
@@ -594,11 +664,13 @@ public class PriceChartFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Boolean shouldShow);
     }
 
-    // Gets Data from our endpoint
+    /**
+     * Sends a HTTP  GET Request to endpoint to get current currency data
+     * @param CCURRENCY Currency type : BTC, ETH, LTC
+     */
     public void getRecentCurrencyData(String CCURRENCY){
 
         String tag_json_arry = "GLOBAL";
@@ -623,8 +695,10 @@ public class PriceChartFragment extends Fragment {
 
                         Log.d("GSONPARSEDEBUG", "-------->>"+ccd.toString());
 
-                        tvCurrentPrice.setText(String.valueOf(ccd.getAsk()));
-                        tvPriceChange.setText(String.valueOf(ccd.getChanges().getPrice().getDaily()));
+
+                        updateCurrentPriceUI(ccd.getAsk(), ccd.getChanges().getPrice().getDaily());
+
+
 
 
                     }
@@ -666,7 +740,11 @@ public class PriceChartFragment extends Fragment {
 
     }
 
-    // makes request to history endpoint
+    /**
+     * Sends HTTP GET Request to endpoint to get historical data
+     * @param CCURRENCY BTC,ETH,LTC
+     * @param period daily, monthly, alltime
+     */
     public void getHistoricalCurrencyData(String CCURRENCY, String period){
 
         String tag_json_arry = "GLOBAL";

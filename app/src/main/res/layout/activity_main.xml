@@ -37,7 +37,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_default"
                     android:layout_marginBottom="@dimen/margin_small"
-                    android:src="@mipmap/ic_launcher"
+                    android:src="@drawable/logo_transparent"
                     android:layout_centerHorizontal="true" />
                 <fragment
                     android:id="@+id/price_chart"
@@ -53,22 +53,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true">
-            <Button android:id="@+id/btnLoginIntroSignupText"
+            <Button android:id="@+id/btnShare"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/margin_default"
-                android:text="xxxxx"
+                android:background="@color/intro_light_blue"
+                android:textColor="@color/white"
+                android:text="@string/sharenow"
                 android:filterTouchesWhenObscured="true"
                  />
             <TextView
                 android:textSize="14sp"
                 android:textColor="#ffffff"
-                android:gravity="top|bottom|left|right|center_vertical|fill_vertical|center_horizontal|fill_horizontal|center|fill|start|end"
+                android:padding="@dimen/margin_button"
+                android:gravity="center"
                 android:id="@+id/tvLoginIntroSignin"
+                android:clickable="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/margin_default"
-                android:text="yy" />
+                android:text="@string/vote" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

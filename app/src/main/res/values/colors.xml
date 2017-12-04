@@ -12,10 +12,7 @@
     <color name="background_material_dark">@color/material_grey_850</color>
     <color name="background_material_light">@color/material_grey_50</color>
 
-    <color name="primary_dark_material_light">@color/material_grey_600</color>
-    <color name="primary_light">#bcd6e7</color>
-    <color name="primary_material_dark">@color/material_grey_900</color>
-    <color name="primary_material_light">@color/material_grey_100</color>
+
     <color name="primary_mystique_extra_light_text_color">#801a3650</color>
     <color name="primary_mystique_light_text_color">#b31a3650</color>
     <color name="primary_mystique_text_color">#1a3650</color>
@@ -28,13 +25,10 @@
 
     <color name="ripple_material_dark">#33ffffff</color>
     <color name="ripple_material_light">#1f000000</color>
-    <color name="secondary_text_default_material_dark">#b3ffffff</color>
-    <color name="secondary_text_default_material_light">#8a000000</color>
-    <color name="secondary_text_disabled_material_dark">#36ffffff</color>
-    <color name="secondary_text_disabled_material_light">#24000000</color>
+
     <color name="section_header">#757575</color>
     <color name="section_header_mystique">#0667d0</color>
-    <color name="cerulean">#0667d0</color>
+    <color name="cerulean">#9f0000</color>
     <color name="gradient_secondary_blue">#0655ab</color>
 
     <color name="dark_grey">#4e5c6e</color>
