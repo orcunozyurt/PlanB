@@ -23,7 +23,7 @@
     <string name="invitation_message">Watch Coin Prices Going High!</string>
     <string name="invitation_title">Invite</string>
     <string name="invitation_cta">Invite</string>
-    <string name="share_message">%1$s is $%2$s %3$s today. It is now $%4$s! #%5$s via https://play.google.com/store/apps/details?id=com.nerdzlab.planb</string>
+    <string name="share_message">%1$s is $%2$s %3$s today. It is now $%4$s! #%5$s via https://play.google.com/store/apps/details?id=com.nerdz.planb</string>
     <string name="sharenow">Share With Friends</string>
     <string name="ratelimit">Rate limits might apply. Try again later.</string>
 </resources>
