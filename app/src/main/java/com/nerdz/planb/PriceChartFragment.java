@@ -2,9 +2,11 @@ package com.nerdz.planb;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -24,6 +26,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Legend;
@@ -41,12 +44,14 @@ import com.google.gson.Gson;
 import com.nerdz.planb.models.CryptoCurrencyData;
 import com.nerdz.planb.models.HistoricalData;
 import com.nerdz.planb.utils.ApiUtils;
+import com.nerdz.planb.utils.BaseJsonObjectRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,7 +61,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 
 /**
@@ -67,7 +83,7 @@ import java.util.concurrent.TimeUnit;
  * Use the {@link PriceChartFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PriceChartFragment extends Fragment {
+public class PriceChartFragment extends Fragment  {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -110,6 +126,39 @@ public class PriceChartFragment extends Fragment {
     private static String mPeriodPref = "daily"; // App starts with daily period default
 
     private OnFragmentInteractionListener mListener;
+    private CompositeDisposable mCompositeSubscription = new CompositeDisposable();
+    private Activity act;
+
+    /**
+     * @use handle response from future request, in my case JsonObject.
+     */
+    private JSONObject getCurrentCoinData(String CCURRENCY) throws ExecutionException, InterruptedException {
+        RequestFuture<JSONObject> future = RequestFuture.newFuture();
+        String Url=ApiUtils.BASEURL+ "/indices/global/ticker/"+CCURRENCY+"USD";;
+        final Request.Priority priority= Request.Priority.IMMEDIATE;
+        BaseJsonObjectRequest req= new BaseJsonObjectRequest(Request.Method.GET, Url,future,future,act,priority);
+        PlanBApplication.getInstance().addToRequestQueue(req);
+        return future.get();
+    }
+
+    /**
+     *@use the observable, same type data JSONObject
+     */
+    private Observable<JSONObject>  newGetCurrentCoinData(){
+        return  Observable.defer(new Callable<ObservableSource<? extends JSONObject>>() {
+            @Override
+            public ObservableSource<? extends JSONObject> call() throws Exception {
+
+                try {
+                    return Observable.just(getCurrentCoinData(mCurrencyPref));
+                } catch (InterruptedException | ExecutionException e) {
+                    Log.e("routes", e.getMessage());
+                    return Observable.error(e);
+                }
+            }
+        });
+    }
+
 
     public PriceChartFragment() {
         // Required empty public constructor
@@ -161,7 +210,7 @@ public class PriceChartFragment extends Fragment {
         prepareUI();
         Timer timer = new Timer();
 
-        // get data and update ui in every 50 seconds.
+        /*// get data and update ui in every 50 seconds.
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -177,7 +226,44 @@ public class PriceChartFragment extends Fragment {
         };
 
 
-        timer.schedule(timerTask, 0, 50000);
+        timer.schedule(timerTask, 0, 50000);*/
+
+        /**
+         * @condition: RxJava future request with volley
+         */
+
+        mCompositeSubscription.add(newGetCurrentCoinData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableObserver<JSONObject>() {
+                    @Override
+                    public void onComplete() {
+                        System.out.println("Completed!");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        VolleyError cause = (VolleyError) e.getCause();
+                        String s = new String(cause.networkResponse.data, Charset.forName("UTF-8"));
+                        Log.e("adf", s);
+                        Log.e("adf", cause.toString());
+                    }
+
+                    @Override
+                    public void onNext(JSONObject json) {
+                        Log.d("ruta", json.toString());
+                        Gson gson = new Gson();
+
+                        CryptoCurrencyData ccd = gson.fromJson(String.valueOf(json),
+                                CryptoCurrencyData.class);
+
+
+                        //Log.d("GSONPARSEDEBUG", "-------->>"+ccd.toString());
+
+
+                        updateCurrentPriceUI(ccd.getAsk(), ccd.getChanges().getPrice().getDaily());
+                    }
+                }));
 
 
         prepareChart();
@@ -475,6 +561,7 @@ public class PriceChartFragment extends Fragment {
         }else {
             prefs.edit().putString("trend", "DOWN!").apply();
         }
+
     }
 
 
@@ -635,6 +722,17 @@ public class PriceChartFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        mCompositeSubscription.clear();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
@@ -650,6 +748,8 @@ public class PriceChartFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
+
 
     /**
      * This interface must be implemented by activities that contain this
